@@ -36,21 +36,31 @@ def main() -> None:
 
     print(f"f1_score: {f1 * 100}%")
 
-    # x_test = pd.read_csv("Test_knight.csv")
-    # y_pred = model.predict(x_test[["Push", "Lightsaber", "Friendship", "Attunement"]])
-    #
-    # with open("preds.txt", "w+") as f:
-    #     for pred in y_pred:
-    #         if pred == 1:
-    #             f.write("Jedi\n")
-    #         else:
-    #             f.write("Sith\n")
-    #
-    # fig = plt.figure(figsize=(25, 20))
-    # _ = tree.plot_tree(
-    #     dtc, feature_names=X.columns, class_names=["Jedi", "Sith"], filled=True
-    # )
-    # fig.savefig("./tree.png")
+    df = pd.read_csv("Train_knight.csv")
+
+    features = ["Push", "Lightsaber", "Friendship", "Attunement"]
+    X_train = df[features]
+    y_train = [0 if x == "Jedi" else 1 for x in df["knight"]]
+
+    model = dtc.fit(X_train, y_train)
+
+    test = pd.read_csv("Test_knight.csv")
+    X_test = test[features]
+
+    y_pred = model.predict(X_test)
+
+    with open("knight_predictions.txt", "w+") as f:
+        for pred in y_pred:
+            if pred == 1:
+                f.write("Jedi\n")
+            else:
+                f.write("Sith\n")
+
+    fig = plt.figure(figsize=(25, 20))
+    _ = tree.plot_tree(
+        dtc, feature_names=features, class_names=["Jedi", "Sith"], filled=True
+    )
+    fig.savefig("./tree.png")
 
 
 if __name__ == "__main__":
