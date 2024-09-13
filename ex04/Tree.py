@@ -51,21 +51,21 @@ def main() -> None:
 
     print(f"f1_score: {f1 * 100}%")
 
-    # x_test = pd.read_csv("Test_knight.csv")
-    # y_pred = model.predict(x_test[["Push", "Lightsaber", "Friendship", "Attunement"]])
-    #
-    # with open("preds.txt", "w+") as f:
-    #     for pred in y_pred:
-    #         if pred == 1:
-    #             f.write("Jedi\n")
-    #         else:
-    #             f.write("Sith\n")
-    #
-    # fig = plt.figure(figsize=(25, 20))
-    # _ = tree.plot_tree(
-    #     dtc, feature_names=X.columns, class_names=["Jedi", "Sith"], filled=True
-    # )
-    # fig.savefig("./tree.png")
+    x_test = pd.read_csv("Test_knight.csv")
+    y_pred = model.predict(x_test[["Push", "Lightsaber", "Friendship", "Attunement"]])
+
+    with open("preds.txt", "w+") as f:
+        for pred in y_pred:
+            if pred == 1:
+                f.write("Jedi\n")
+            else:
+                f.write("Sith\n")
+
+    fig = plt.figure(figsize=(25, 20))
+    _ = tree.plot_tree(
+        dtc, feature_names=X.columns, class_names=["Jedi", "Sith"], filled=True
+    )
+    fig.savefig("./tree.png")
 
 
 if __name__ == "__main__":
