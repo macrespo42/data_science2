@@ -1,10 +1,12 @@
+import sys
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from sklearn import metrics
 
 
-def main() -> None:
+def get_confusion_matrix(truth, prediction):
     tp = 0
     fp = 0
     tn = 0
@@ -12,24 +14,41 @@ def main() -> None:
     jedi_total = 0
     sith_total = 0
 
-    with open("./truth.txt") as truth, open("./predictions.txt") as preds:
-        for t, p in zip(truth, preds):
-            t = t.strip()
-            p = p.strip()
+    try:
+        with open(truth) as truth, open(prediction) as preds:
+            for t, p in zip(truth, preds):
+                t = t.strip()
+                p = p.strip()
 
-            if p == "Jedi":
-                jedi_total += 1
-            elif p == "Sith":
-                sith_total += 1
+                if p == "Jedi":
+                    jedi_total += 1
+                elif p == "Sith":
+                    sith_total += 1
 
-            if p == "Jedi" and p == t:
-                tp += 1
-            elif p == "Sith" and p == t:
-                tn += 1
-            elif p == "Jedi" and p != t:
-                fp += 1
-            elif p == "Sith" and p != t:
-                fn += 1
+                if p == "Jedi" and p == t:
+                    tp += 1
+                elif p == "Sith" and p == t:
+                    tn += 1
+                elif p == "Jedi" and p != t:
+                    fp += 1
+                elif p == "Sith" and p != t:
+                    fn += 1
+    except Exception as e:
+        print(f"Error: {e}")
+        sys.exit(1)
+
+    return tp, fp, tn, fn, jedi_total, sith_total
+
+
+def main() -> None:
+    if len(sys.argv) != 3:
+        print("provide 2 arguments: truth and predictions files")
+        sys.exit(1)
+
+    tp, fp, tn, fn, jedi_total, sith_total = get_confusion_matrix(
+        sys.argv[1], sys.argv[2]
+    )
+
     confusion_matrix = [
         [tp, fn],
         [fp, tn],
@@ -50,6 +69,7 @@ def main() -> None:
         "f1-score": [j_f1_score, s_f1_score],
         "total": [jedi_total, sith_total],
     }
+
     df = pd.DataFrame(data=data, index=["Jedi", "Sith"])
     print(df)
     print(f"accuracy                    {accuracy}      {sith_total + jedi_total}")
