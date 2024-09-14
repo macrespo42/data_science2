@@ -1,5 +1,6 @@
+import matplotlib.pyplot as plt
 import pandas as pd
-from sklearn.metrics import f1_score
+from sklearn.metrics import accuracy_score, f1_score
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.preprocessing import StandardScaler
 
@@ -21,6 +22,16 @@ def preprocess_data(training, validation):
     return X_train, X_test, y_train, y_test
 
 
+def plot_knn_accuracy(k_values, accuracies):
+    plt.figure(figsize=(10, 6))
+    plt.plot(k_values, accuracies, marker="o", linestyle="--")
+    plt.xlabel("K values")
+    plt.ylabel("Accuracy (%)")
+    plt.title("KNN Accuracy vs K values")
+    plt.grid(True)
+    plt.show()
+
+
 def main() -> None:
     training = pd.read_csv("ex04/Training_data.csv")
     validation = pd.read_csv("ex04/Validation_data.csv")
@@ -28,13 +39,26 @@ def main() -> None:
     X_train, X_test, y_train, y_test = preprocess_data(training, validation)
 
     df = pd.read_csv("Train_knight.csv")
-    knn = KNeighborsClassifier(n_neighbors=3)
+    knn = KNeighborsClassifier(n_neighbors=10)
 
     model = knn.fit(X_train, y_train)
     y_pred = model.predict(X_test)
 
     f1 = f1_score(y_test, y_pred)
     print(f"f1_score: {f1 * 100}%")
+
+    k_values = range(1, 31)
+    accuracies = []
+
+    for k in k_values:
+        knn = KNeighborsClassifier(n_neighbors=k)
+
+        model = knn.fit(X_train, y_train)
+        y_pred = model.predict(X_test)
+
+        accuracies.append(accuracy_score(y_test, y_pred))
+
+    plot_knn_accuracy(k_values, accuracies)
 
     features = ["Push", "Lightsaber", "Friendship", "Attunement"]
     X_train = df[features]
