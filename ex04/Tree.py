@@ -51,7 +51,7 @@ def main() -> None:
 
     with open("knight_predictions.txt", "w+") as f:
         for pred in y_pred:
-            if pred == 1:
+            if pred == 0:
                 f.write("Jedi\n")
             else:
                 f.write("Sith\n")
