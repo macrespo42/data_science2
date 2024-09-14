@@ -26,7 +26,7 @@ def plot_knn_accuracy(k_values, accuracies):
     plt.figure(figsize=(10, 6))
     plt.plot(k_values, accuracies, marker="o", linestyle="--")
     plt.xlabel("K values")
-    plt.ylabel("Accuracy (%)")
+    plt.ylabel("Accuracy")
     plt.title("KNN Accuracy vs K values")
     plt.grid(True)
     plt.show()
