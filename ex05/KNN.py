@@ -39,7 +39,7 @@ def main() -> None:
     X_train, X_test, y_train, y_test = preprocess_data(training, validation)
 
     df = pd.read_csv("Train_knight.csv")
-    knn = KNeighborsClassifier(n_neighbors=10)
+    knn = KNeighborsClassifier(n_neighbors=5)
 
     model = knn.fit(X_train, y_train)
     y_pred = model.predict(X_test)
