@@ -3,6 +3,10 @@ import pandas as pd
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import f1_score
 from sklearn.preprocessing import StandardScaler
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.ensemble import VotingClassifier
+from sklearn import model_selection
 
 
 def preprocess_data(training, validation):
@@ -21,41 +25,32 @@ def preprocess_data(training, validation):
 
     return X_train, X_test, y_train, y_test
 
-
-def plot_knn_accuracy(k_values, accuracies):
-    plt.figure(figsize=(10, 6))
-    plt.plot(k_values, accuracies, marker="o", linestyle="--")
-    plt.xlabel("K values")
-    plt.ylabel("Accuracy")
-    plt.title("KNN Accuracy vs K values")
-    plt.grid(True)
-    plt.show()
-
-
 def main() -> None:
     training = pd.read_csv("ex04/Training_data.csv")
     validation = pd.read_csv("ex04/Validation_data.csv")
 
     X_train, X_test, y_train, y_test = preprocess_data(training, validation)
 
-    cls = LogisticRegression(random_state=42)
+    clf1 = LogisticRegression(random_state=42)
+    clf2 = DecisionTreeClassifier(random_state=42)
+    clf3 = KNeighborsClassifier(n_neighbors=5)
 
-    model = cls.fit(X_train, y_train)
-    y_pred = model.predict(X_test)
+    labels = ["Logistic regression", "DecisionTree", "KNN"]
 
+    for clf, label in zip([clf1, clf2, clf3], labels):
+        scores = model_selection.cross_val_score(clf, X_train, y_train, cv=5, scoring="accuracy")
+
+        print("Accuracy: %0.2f (+/- %0.2f) [%s]"
+              % (scores.mean(), scores.std(), label))
+
+    voting_clf_hard = VotingClassifier(estimators=[(labels[0], clf1),(labels[1], clf2), (labels[2], clf3)], voting="hard")
+    # D'abord, on doit entraîner le classifieur avec fit()
+    voting_clf_hard.fit(X_train, y_train)
+    # Ensuite on peut faire les prédictions sur X_test
+    y_pred = voting_clf_hard.predict(X_test)
+    # Calculer et afficher le F1-score
     f1 = f1_score(y_test, y_pred)
-    print(f"f1_score: {f1 * 100}%")
-
-    df = pd.read_csv("Train_knight.csv")
-    features = ["Push", "Lightsaber", "Friendship", "Attunement"]
-    X_train = df[features]
-    y_train = [0 if x == "Jedi" else 1 for x in df["knight"]]
-
-    model = cls.fit(X_train, y_train)
-
-    test = pd.read_csv("Test_knight.csv")
-    X_test = test[features]
-    y_pred = model.predict(X_test)
+    print(f"F1-score: {f1:.4f}")
 
     with open("Voting.txt", "w+") as f:
         for pred in y_pred:
