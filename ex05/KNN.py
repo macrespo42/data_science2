@@ -33,8 +33,14 @@ def plot_knn_accuracy(k_values, accuracies):
 
 
 def main() -> None:
-    training = pd.read_csv("ex04/Training_data.csv")
-    validation = pd.read_csv("ex04/Validation_data.csv")
+    training = None
+    validation = None
+    try:
+        training = pd.read_csv("datasets/Training_data.csv")
+        validation = pd.read_csv("datasets/Validation_data.csv")
+    except Exception:
+        print("Please run the script from the root directory")
+        exit(1)
 
     X_train, X_test, y_train, y_test = preprocess_data(training, validation)
 

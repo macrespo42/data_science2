@@ -1,12 +1,11 @@
-import matplotlib.pyplot as plt
 import pandas as pd
+from sklearn import model_selection
+from sklearn.ensemble import VotingClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import f1_score
+from sklearn.neighbors import KNeighborsClassifier
 from sklearn.preprocessing import StandardScaler
 from sklearn.tree import DecisionTreeClassifier
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.ensemble import VotingClassifier
-from sklearn import model_selection
 
 
 def preprocess_data(training, validation):
@@ -25,9 +24,16 @@ def preprocess_data(training, validation):
 
     return X_train, X_test, y_train, y_test
 
+
 def main() -> None:
-    training = pd.read_csv("ex04/Training_data.csv")
-    validation = pd.read_csv("ex04/Validation_data.csv")
+    training = None
+    validation = None
+    try:
+        training = pd.read_csv("datasets/Training_data.csv")
+        validation = pd.read_csv("datasets/Validation_data.csv")
+    except Exception:
+        print("Please run the script from the root directory")
+        exit(1)
 
     X_train, X_test, y_train, y_test = preprocess_data(training, validation)
 
@@ -38,12 +44,16 @@ def main() -> None:
     labels = ["Logistic regression", "DecisionTree", "KNN"]
 
     for clf, label in zip([clf1, clf2, clf3], labels):
-        scores = model_selection.cross_val_score(clf, X_train, y_train, cv=5, scoring="accuracy")
+        scores = model_selection.cross_val_score(
+            clf, X_train, y_train, cv=5, scoring="accuracy"
+        )
 
-        print("Accuracy: %0.2f (+/- %0.2f) [%s]"
-              % (scores.mean(), scores.std(), label))
+        print("Accuracy: %0.2f (+/- %0.2f) [%s]" % (scores.mean(), scores.std(), label))
 
-    voting_clf_hard = VotingClassifier(estimators=[(labels[0], clf1),(labels[1], clf2), (labels[2], clf3)], voting="hard")
+    voting_clf_hard = VotingClassifier(
+        estimators=[(labels[0], clf1), (labels[1], clf2), (labels[2], clf3)],
+        voting="hard",
+    )
     # D'abord, on doit entraîner le classifieur avec fit()
     voting_clf_hard.fit(X_train, y_train)
     # Ensuite on peut faire les prédictions sur X_test
