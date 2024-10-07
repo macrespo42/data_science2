@@ -50,8 +50,8 @@ def main() -> None:
     )
 
     confusion_matrix = [
-        [tp, fn],
-        [fp, tn],
+        [tp, fp],
+        [fn, tn],
     ]
 
     accuracy = (tp + tn) / (tp + tn + fp + fn)
