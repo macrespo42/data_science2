@@ -3,7 +3,12 @@ from statsmodels.stats.outliers_influence import variance_inflation_factor
 
 
 def main() -> None:
-    df = pd.read_csv("Train_knight.csv")
+    df = None
+    try:
+        df = pd.read_csv("Train_knight.csv")
+    except Exception:
+        print("Please run the script from the root of the project")
+        exit(1)
 
     X = df.drop(
         [
