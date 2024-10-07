@@ -1,25 +1,10 @@
+import sys
 import matplotlib.pyplot as plt
 import pandas as pd
 from sklearn.metrics import accuracy_score, f1_score
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.preprocessing import StandardScaler
-
-
-def preprocess_data(training, validation):
-    features = ["Push", "Lightsaber", "Friendship", "Attunement"]
-
-    X_train = training[features]
-    X_test = validation[features]
-
-    scaler = StandardScaler()
-
-    X_train = scaler.fit_transform(X_train)
-    X_test = scaler.fit_transform(X_test)
-
-    y_train = [0 if x == "Jedi" else 1 for x in training["knight"]]
-    y_test = [0 if x == "Jedi" else 1 for x in validation["knight"]]
-
-    return X_train, X_test, y_train, y_test
+from sklearn.model_selection import train_test_split
 
 
 def plot_knn_accuracy(k_values, accuracies):
@@ -33,24 +18,35 @@ def plot_knn_accuracy(k_values, accuracies):
 
 
 def main() -> None:
-    training = None
-    validation = None
+    if len(sys.argv) != 3:
+        print("provide 2 arguments: truth and predictions files")
+        sys.exit(1)
+    training = sys.argv[1]
+    validation = sys.argv[2]
+
     try:
-        training = pd.read_csv("datasets/Training_data.csv")
-        validation = pd.read_csv("datasets/Validation_data.csv")
-    except Exception:
-        print("Please run the script from the root directory")
+        training_df = pd.read_csv(training)
+        validation_df = pd.read_csv(validation)
+    except Exception as e:
+        print(f"Error: {e}")
         exit(1)
 
-    X_train, X_test, y_train, y_test = preprocess_data(training, validation)
+    X = training_df.drop("knight", axis=1)
+    y = training_df["knight"]
 
-    df = pd.read_csv("Train_knight.csv")
-    knn = KNeighborsClassifier(n_neighbors=5)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=42)
+
+    knn = KNeighborsClassifier(n_neighbors=6)
 
     model = knn.fit(X_train, y_train)
     y_pred = model.predict(X_test)
 
-    f1 = f1_score(y_test, y_pred)
+    scaler = StandardScaler()
+
+    X_train = scaler.fit_transform(X_train)
+    X_test = scaler.fit_transform(X_test)
+
+    f1 = f1_score(y_test.values, y_pred, pos_label='Sith')
     print(f"f1_score: {f1 * 100}%")
 
     k_values = range(1, 31)
@@ -66,22 +62,9 @@ def main() -> None:
 
     plot_knn_accuracy(k_values, accuracies)
 
-    features = ["Push", "Lightsaber", "Friendship", "Attunement"]
-    X_train = df[features]
-    y_train = [0 if x == "Jedi" else 1 for x in df["knight"]]
-
-    model = knn.fit(X_train, y_train)
-
-    test = pd.read_csv("Test_knight.csv")
-    X_test = test[features]
-    y_pred = model.predict(X_test)
-
     with open("KNN.txt", "w+") as f:
         for pred in y_pred:
-            if pred == 0:
-                f.write("Jedi\n")
-            else:
-                f.write("Sith\n")
+            f.write(f"{pred}\n")
 
 
 if __name__ == "__main__":

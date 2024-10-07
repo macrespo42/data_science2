@@ -36,7 +36,7 @@ def main() -> None:
 
     y_pred = model.predict(X_test)
 
-    f1 = f1_score(y_test.values, y_pred, pos_label='Jedi')
+    f1 = f1_score(y_test.values, y_pred, pos_label='Sith')
 
     print(f"f1_score: {f1 * 100}%")
 
