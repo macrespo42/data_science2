@@ -37,6 +37,7 @@ def get_confusion_matrix(truth, prediction):
         print(f"Error: {e}")
         sys.exit(1)
 
+    print(f"Stats: tp: {tp}, fp: {fp}, tn: {tn}, fn: {fn}")
     return tp, fp, tn, fn, jedi_total, sith_total
 
 
@@ -54,14 +55,14 @@ def main() -> None:
         [fn, tn],
     ]
 
-    accuracy = (tp + tn) / (tp + tn + fp + fn)
-    j_precision = tp / (tp + fp)
-    j_recall = tp / (tp + fn)
-    j_f1_score = 2 * (j_precision * j_recall) / (j_precision + j_recall)
+    accuracy = (tp + tn) / (tp + tn + fp + fn) if ((tp + tn + fp + fn)) != 0 else 0
+    j_precision = tp / (tp + fp) if (tp + fp) > 0 else 0
+    j_recall = tp / (tp + fn) if (tp + fn) > 0 else 0
+    j_f1_score = 2 * (j_precision * j_recall) / (j_precision + j_recall) if (j_precision + j_recall) else 0
 
-    s_precision = tn / (fn + tn)
-    s_recall = tn / (tn + fp)
-    s_f1_score = 2 * (s_precision * s_recall) / (s_precision + s_recall)
+    s_precision = tn / (fn + tn) if (fn + tn) > 0 else 0
+    s_recall = tn / (tn + fp) if (tn + fp) else 0
+    s_f1_score = 2 * (s_precision * s_recall) / (s_precision + s_recall) if (s_precision + s_recall) > 0 else 0
 
     data = {
         "precision": [j_precision, s_precision],
