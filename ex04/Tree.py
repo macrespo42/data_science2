@@ -1,70 +1,52 @@
+import sys
 import matplotlib.pyplot as plt
 import pandas as pd
 from sklearn import tree
 from sklearn.metrics import f1_score
-from sklearn.preprocessing import StandardScaler
 from sklearn.tree import DecisionTreeClassifier
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
 
+def main() -> None:
+    if len(sys.argv) != 3:
+        print("provide 2 arguments: truth and predictions files")
+        sys.exit(1)
+    training = sys.argv[1]
+    validation = sys.argv[2]
 
-def preprocess_data(training, validation):
-    features = ["Push", "Lightsaber", "Friendship", "Attunement"]
+    try:
+        training_df = pd.read_csv(training)
+        validation_df = pd.read_csv(validation)
+    except Exception as e:
+        print(f"Error: {e}")
+        exit(1)
 
-    X_train = training[features]
-    X_test = validation[features]
+    X = training_df.drop("knight", axis=1)
+    y = training_df["knight"]
+
+    X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=42)
 
     scaler = StandardScaler()
 
     X_train = scaler.fit_transform(X_train)
     X_test = scaler.fit_transform(X_test)
 
-    y_train = [0 if x == "Jedi" else 1 for x in training["knight"]]
-    y_test = [0 if x == "Jedi" else 1 for x in validation["knight"]]
-
-    return X_train, X_test, y_train, y_test
-
-
-def main() -> None:
-    training = None
-    validation = None
-    try:
-        training = pd.read_csv("datasets/Training_data.csv")
-        validation = pd.read_csv("datasets/Validation_data.csv")
-    except Exception:
-        print("Please run the script from the root directory")
-        exit(1)
-
-    X_train, X_test, y_train, y_test = preprocess_data(training, validation)
     dtc = DecisionTreeClassifier(random_state=42)
     model = dtc.fit(X_train, y_train)
 
     y_pred = model.predict(X_test)
-    f1 = f1_score(y_test, y_pred)
+
+    f1 = f1_score(y_test.values, y_pred, pos_label='Jedi')
 
     print(f"f1_score: {f1 * 100}%")
 
-    df = pd.read_csv("Train_knight.csv")
-
-    features = ["Push", "Lightsaber", "Friendship", "Attunement"]
-    X_train = df[features]
-    y_train = [0 if x == "Jedi" else 1 for x in df["knight"]]
-
-    model = dtc.fit(X_train, y_train)
-
-    test = pd.read_csv("Test_knight.csv")
-    X_test = test[features]
-
-    y_pred = model.predict(X_test)
-
-    with open("knight_predictions.txt", "w+") as f:
+    with open("Tree.txt", "w+") as f:
         for pred in y_pred:
-            if pred == 0:
-                f.write("Jedi\n")
-            else:
-                f.write("Sith\n")
+            f.write(f"{pred}\n")
 
     fig = plt.figure(figsize=(25, 20))
     _ = tree.plot_tree(
-        dtc, feature_names=features, class_names=["Jedi", "Sith"], filled=True
+        dtc, class_names=["Jedi", "Sith"], filled=True
     )
     fig.savefig("./tree.png")
 
